@@ -13,4 +13,4 @@ def tickets(request):
     return render(request, "tickets/tickets.html")
 
 def ticket_detail(request):
-    return HttpResponse("A ticket!") 
+    return render(request, "tickets/ticket-detail.html") 
