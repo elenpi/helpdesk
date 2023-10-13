@@ -1,0 +1,28 @@
+/* Apply basic styles to the navbar */
+.navbar {
+    background-color: #333; /* Background color */
+    color: #fff; /* Text color */
+    padding: 10px; /* Add some padding to the navbar */
+}
+
+/* Style the navigation links */
+.navbar ul {
+    list-style-type: none; /* Remove list bullet points */
+    margin: 0;
+    padding: 0;
+}
+
+.navbar ul li {
+    display: inline; /* Display the list items horizontally */
+    margin-right: 20px; /* Add some space between list items */
+}
+
+.navbar a {
+    text-decoration: none; /* Remove underlines from links */
+    color: #fff; /* Text color for links */
+}
+
+/* Style for links on hover */
+.navbar a:hover {
+    text-decoration: underline; /* Underline on hover */
+}
