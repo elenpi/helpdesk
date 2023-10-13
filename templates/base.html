@@ -7,6 +7,13 @@
     {% block css_files %}{% endblock %}
 </head>
 <body>
+    <header>
+        <nav class="navbar">
+            <ul>
+                <li><a href="{% url 'landing-page' %}">Home</a></li>
+            </ul>
+        </nav>
+    </header>
     {% block content %}{% endblock  %}
 </body>
 </html>

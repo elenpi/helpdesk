@@ -10,7 +10,7 @@ def create_ticket(request):
     return HttpResponse("New ticket!") 
 
 def tickets(request):
-    return HttpResponse("My tickets!")
+    return render(request, "tickets/tickets.html")
 
 def ticket_detail(request):
     return HttpResponse("A ticket!") 
