@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block title %}HelpDesk{% endblock %}
+
+{%block content %} 
+
+<h1>Welcome to HelpDesk!</h1>
+
+<p>
+    Lorem ipsum dolor sit amet consectetur adipisicing elit. Magnam
+    aut sit rem iusto? Deserunt repellat quo autem quas vel aliquid ab dolorum earum
+    eum, unde fugiat non reiciendis reprehenderit suscipit. 
+</p>
+
+<ul>
+    <li>
+        <a href="{% url "ticket-creation-page" %}">Create ticket</a>
+    </li>
+    <li><a href="{% url "tickets-page" %}">View tickets</a></li>
+</ul>
+
+
+{% endblock %}
