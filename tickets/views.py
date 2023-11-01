@@ -13,12 +13,12 @@ from .models import Ticket
 
 # Create your views here.
 
-class OpenTicketsList(ListView):
+class OpenTicketsList(LoginRequiredMixin, ListView):
     template_name = "tickets/index.html"
     model = Ticket
     context_object_name= "tickets"
 
-class CreateTicketView(LoginRequiredMixin,CreateView):
+class CreateTicketView(LoginRequiredMixin, CreateView):
     model = Ticket
     form_class = CreateTicket
     template_name = "tickets/ticket_creation.html"
@@ -28,12 +28,12 @@ class CreateTicketView(LoginRequiredMixin,CreateView):
         form.instance.reporter = self.request.user 
         return super().form_valid(form)
 
-class TicketList(ListView):
+class TicketList(LoginRequiredMixin, ListView):
     template_name = "tickets/tickets.html"
     model = Ticket
     context_object_name= "tickets"
 
 
-class TicketDetail(DetailView):
+class TicketDetail(LoginRequiredMixin, DetailView):
     template_name = "tickets/ticket_detail.html" 
     model = Ticket

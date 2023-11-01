@@ -12,11 +12,27 @@
 </head>
 
 <body>
-     <nav class="navbar">
-        <ul>
-            <li><a href="{% url 'landing-page' %}">Home</a></li>
-        </ul>
+    <nav>
+        <div class="nav-bar">
+            <div class="nav-left">
+                <a href="{% url 'landing-page' %}">Home</a>
+            </div>
+    
+            <div class="nav-right">
+                <div class="dropdown-menu">
+                    <a href="#" class="nav-menu-icon">Menu</a>
+                    <div class="dropdown-content">
+                        <a href="{% url 'tickets-page' %}">My tickets</a>
+                        <a href="{% url 'ticket-creation-page' %}">Create Ticket</a>
+                        <a href="{% url 'logout' %}">Logout</a>
+                    </div>
+                </div>
+            </div>
+        </div>
     </nav>
+
     {% block content %}{% endblock  %}
 </body>
+
+
 </html>
