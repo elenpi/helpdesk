@@ -1,9 +1,11 @@
 from django.urls import path
+from django.contrib.auth import views as auth_views
 from . import views
 
 urlpatterns = [
-    path("", views.index, name="landing-page"),
-    path("create-ticket", views.create_ticket, name="ticket-creation-page"),
-    path("tickets", views.tickets, name="tickets-page"),
-    path("tickets/<slug:slug",views.ticket_detail, name="ticket-detail-page")
+    path('login/', auth_views.LoginView.as_view(), name='login'),
+    path("", views.OpenTicketsList.as_view(), name="landing-page"),
+    path("tickets/create", views.CreateTicketView.as_view(), name="ticket-creation-page"),
+    path("tickets/", views.TicketList.as_view(), name="tickets-page"),
+    path("tickets/<int:pk>",views.TicketDetail.as_view(), name="ticket-detail-page")
 ]

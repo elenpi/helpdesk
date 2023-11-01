@@ -3,10 +3,20 @@
 {% block title %}{% endblock %}
 
 {% block content %}
-<h1>My tickets</h1>
+
+<h1>All Tickets:</h1>
+
+<div>
+
     <ul>
-        <li>
-            <a href="{% url "ticket-detail-page" %}">Ticket</a>
-        </li>
+        {% for ticket in tickets %}
+        <a href="{% url 'ticket-detail-page' pk=ticket.pk %}">
+            <li>{{ ticket.title }} (Status: {{ ticket.status }})</li>
+        </a>
+        {% endfor %}
+    
     </ul>
+
+</div>
+
 {% endblock %}

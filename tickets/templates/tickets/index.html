@@ -4,18 +4,35 @@
 
 {%block content %} 
 
-<h1>Welcome to HelpDesk!</h1>
+<section id= "welcome">
+    <h1>Welcome to HelpDesk!</h1>
 
-<p>
-    Lorem ipsum dolor sit amet consectetur adipisicing elit. Magnam
-    aut sit rem iusto? Deserunt repellat quo autem quas vel aliquid ab dolorum earum
-    eum, unde fugiat non reiciendis reprehenderit suscipit. 
-</p>
+    <p>
+        Lorem ipsum dolor sit amet consectetur adipisicing elit. Magnam
+        aut sit rem iusto? Deserunt repellat quo autem quas vel aliquid ab dolorum earum
+        eum, unde fugiat non reiciendis reprehenderit suscipit. 
+    </p>
+    
+</section>
 
-<ul>
-    <li>
-        <a href="{% url "ticket-creation-page" %}">Create ticket</a>
-    </li>
-    <li><a href="{% url "tickets-page" %}">View tickets</a></li>
-</ul>
+<section id="open-tickets">
+    <h1>Your Open Tickets:</h1>
+
+<div>
+    <ul>
+        {% for ticket in tickets %} 
+            {% if ticket.status == "open" %}
+                <li>
+                    <a href="{% url 'ticket-detail-page' pk=ticket.pk %}">
+                        {{ ticket.title }} (Status: {{ ticket.status }})
+                    </a>
+                </li>
+            {% endif %}
+        {% endfor %}
+    </ul>
+
+</div>
+   
+</section>
+
 {% endblock %}

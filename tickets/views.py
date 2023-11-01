@@ -1,16 +1,39 @@
 from django.shortcuts import render
 from django.http import HttpResponse
+from django.contrib.auth.mixins import LoginRequiredMixin
+
+from django.views import View
+from django.views.generic.base import TemplateView
+from django.views.generic import ListView, DetailView
+from django.views.generic.edit import FormView,CreateView
+
+from .forms import CreateTicket
+from .models import Ticket
+
 
 # Create your views here.
 
-def index(request):
-    return render(request, "tickets/index.html") 
+class OpenTicketsList(ListView):
+    template_name = "tickets/index.html"
+    model = Ticket
+    context_object_name= "tickets"
 
-def create_ticket(request):
-    return HttpResponse("New ticket!") 
+class CreateTicketView(LoginRequiredMixin,CreateView):
+    model = Ticket
+    form_class = CreateTicket
+    template_name = "tickets/ticket_creation.html"
+    success_url = "/"
 
-def tickets(request):
-    return render(request, "tickets/tickets.html")
+    def form_valid(self, form):
+        form.instance.reporter = self.request.user 
+        return super().form_valid(form)
 
-def ticket_detail(request):
-    return render(request, "tickets/ticket-detail.html") 
+class TicketList(ListView):
+    template_name = "tickets/tickets.html"
+    model = Ticket
+    context_object_name= "tickets"
+
+
+class TicketDetail(DetailView):
+    template_name = "tickets/ticket_detail.html" 
+    model = Ticket

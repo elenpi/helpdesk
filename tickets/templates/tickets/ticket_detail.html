@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block title %}Ticket{% endblock %}
+
+{% block content%}
+
+<h1>{{ticket.title}}</h1>
+
+<section id= "details">
+    <p>Reporter: {{ticket.reporter}}</p>
+    <p>Created at: {{ticket.time_created}}</p>
+    <p>Status: {{ ticket.category }}</p>
+    <p>Status: {{ ticket.status }}</p>
+</section>
+
+<section id="description">
+    <p>{{ ticket.description }}</p>
+</section>
+
+{% endblock %}
