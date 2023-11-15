@@ -29,7 +29,10 @@
                     <a href="#" class="nav-menu-icon">Menu</a>
                     <div class="dropdown-content">
                         <a href="{% url 'tickets-page' %}">My tickets</a>
-                        {% if not request.user.profile.is_agent %}
+                        {% if request.user.profile.is_agent %}
+                            <a href="{% url 'tickets-statistics' %}">Statistics</a>
+                            <a href="{% url 'tickets-report' %}">Reports</a>
+                        {% else %}
                             <a href="{% url 'ticket-creation-page' %}">Create Ticket</a>
                         {% endif %}
                         <a href="{% url 'logout' %}">Logout</a>

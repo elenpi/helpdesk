@@ -1,9 +1,10 @@
-{% block title %}
-Report
-{% endblock %}
+{% extends "base.html" %}
+{% block title %}Reports{% endblock %}
 
 {% block content %}
-<form id="reportForm" method="post" action="{% url 'ticket-report' %}">
+
+<h2>Download Reports</h2>
+<form id="reportForm" method="post" action="{% url 'tickets-report' %}">
     {% csrf_token %}
     <label for="timespan">Select Timespan:</label>
     <select name="timespan" id="timespan">

@@ -17,7 +17,7 @@ from django.urls import reverse, reverse_lazy
 from django.http import Http404, JsonResponse, HttpResponse, HttpResponseRedirect
 
 from .forms import CreateTicket, CustomUserCreationForm, TicketForm, RatingForm
-from .models import Ticket, User
+from .models import Ticket, User, Profile
 
 
 # Create your views here.
@@ -38,10 +38,9 @@ class OpenTicketsList(LoginRequiredMixin, ListView):
 
     def get_queryset(self):
         user = self.request.user
-
         if user.profile.is_agent:
-            return Ticket.objects.filter(assignee=user)
-        return Ticket.objects.filter(reporter=user)
+            return Ticket.objects.filter(assignee=user, status__in=["open", "in development"])
+        return Ticket.objects.filter(reporter=user, status__in=["open", "in development"])
 
 
 class CreateTicketView(LoginRequiredMixin, CreateView):
@@ -71,6 +70,16 @@ class TicketList(LoginRequiredMixin, ListView):
     template_name = "tickets/tickets.html"
     model = Ticket
     context_object_name= "tickets"
+
+    def get_queryset(self):
+        
+        profile = Profile.objects.get(user=self.request.user)
+        
+        
+        if profile.is_agent:
+            return Ticket.objects.filter(assignee=self.request.user)
+        else:
+            return Ticket.objects.filter(reporter=self.request.user)
 
 
 class TicketDetail(LoginRequiredMixin, DetailView):
