@@ -1,0 +1,16 @@
+{% block title %}
+Report
+{% endblock %}
+
+{% block content %}
+<form id="reportForm" method="post" action="{% url 'ticket-report' %}">
+    {% csrf_token %}
+    <label for="timespan">Select Timespan:</label>
+    <select name="timespan" id="timespan">
+        <option value="daily">Daily</option>
+        <option value="weekly">Weekly</option>
+        <option value="monthly">Monthly</option>
+    </select>
+    <button type="submit">Download Report</button>
+</form>
+{% endblock %}

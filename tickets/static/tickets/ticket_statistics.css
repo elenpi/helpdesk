@@ -1,0 +1,38 @@
+.ticket-stat-box {
+    border: 1px solid #ccc;
+    padding: 15px;
+    margin: 10px;
+    background-color: rgba(255, 255, 255, 0.8);
+    border-radius: 8px;
+}
+
+/* Style for the two columns */
+.ticket-stat-box p {
+    display: inline-block;
+    width: 45%; /* Adjust the width as needed */
+}
+
+/* Additional styling for the header */
+.ticket-stat-header {
+    font-size: 1.5em;
+    margin-bottom: 10px;
+}
+
+.chart-container {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    margin-top: 20px;
+}
+
+/* Style for each chart */
+.chart {
+    width: 30%; /* Adjust the width as needed */
+    margin-bottom: 20px;
+}
+
+/* Additional styling for the header */
+.ticket-stat-header {
+    font-size: 1.5em;
+    margin-bottom: 10px;
+}

@@ -9,5 +9,9 @@ urlpatterns = [
     path("", views.OpenTicketsList.as_view(), name="landing-page"),
     path("tickets/create", views.CreateTicketView.as_view(), name="ticket-creation-page"),
     path("tickets/", views.TicketList.as_view(), name="tickets-page"),
-    path("tickets/<int:pk>",views.TicketDetail.as_view(), name="ticket-detail-page")
+    path("tickets/<int:pk>",views.TicketDetail.as_view(), name="ticket-detail-page"),
+    path("tickets/<int:pk>/edit",views.TicketUpdate.as_view(), name="ticket-detail-edit"),
+    path("tickets/<int:pk>/delete",views.TicketDelete.as_view(), name="ticket-delete"),
+    path("tickets/statistics",views.TicketStatistics.as_view(), name="ticket-statistics"),
+    path("tickets/reports/", views.Reports.as_view(), name="ticket-report")
 ]

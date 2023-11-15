@@ -37,4 +37,28 @@ class CreateTicket(forms.ModelForm):
         error_messages={
             "required":"Yout name must be entered",
             "max_length": "Please enter a shorter name!"
-        }   
+        } 
+
+class TicketForm(forms.ModelForm):
+    class Meta:
+        model = Ticket
+        fields = ["title", "category", "status", "description"]
+
+    def __init__(self, user, *args, **kwargs):
+        super(TicketForm, self).__init__(*args, **kwargs)
+        self.user = user
+        if not self.user.profile.is_agent:
+            self.fields.pop('status')
+
+class RatingForm(forms.ModelForm):
+    RATING_CHOICES = [(str(i), str(i)) for i in range(1, 6)]
+
+    rating = forms.ChoiceField(
+        choices=RATING_CHOICES, 
+        label='Rating', 
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
+
+    class Meta:
+        model = Ticket
+        fields = ['rating']

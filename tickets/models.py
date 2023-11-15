@@ -1,5 +1,6 @@
 from django.db import models
 from django.core.validators import MinValueValidator, MaxValueValidator
+from django.utils import timezone
 from django.contrib.auth.models import User
 
 
@@ -40,6 +41,13 @@ class Ticket(models.Model):
 
     def __str__(self):
         return f"{self.title}, {self.status}"
+    
+    def save(self, *args, **kwargs):
+        if self.status == Status.IN_DEVELOPMENT.value and self.time_in_development is None:
+            self.time_in_development = timezone.now()
+        elif self.status == Status.CLOSED.value and self.time_closed is None:
+            self.time_closed = timezone.now()
+        super(Ticket, self).save(*args, **kwargs)
 
     class Meta:
         verbose_name_plural = "Tickets"

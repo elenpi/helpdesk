@@ -7,8 +7,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}{% endblock %}</title>
 
+    {% block css_files %} {% endblock %}
+
     <link rel="stylesheet" href="{% static "app.css" %}">
-    {% block css_files %}{% endblock %}
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vega@5"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vega-lite@4"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vega-embed@6"></script>
+    
 </head>
 
 <body>
@@ -34,6 +40,7 @@
     </nav>
 
     {% block content %}{% endblock  %}
+    {% block javascript %}{% endblock %}
 </body>
 
 
