@@ -11,7 +11,7 @@ import pandas as pd
 
 from django.views import View
 from django.views.generic import ListView, DetailView, UpdateView
-from django.views.generic.edit import FormView,CreateView
+from django.views.generic.edit import FormView, CreateView
 from django.contrib.messages.views import SuccessMessageMixin
 from django.urls import reverse, reverse_lazy
 from django.http import Http404, JsonResponse, HttpResponse, HttpResponseRedirect
@@ -31,10 +31,11 @@ class Registration(FormView):
         form.save()
         return super().form_valid(form)
 
+
 class OpenTicketsList(LoginRequiredMixin, ListView):
     template_name = "tickets/index.html"
     model = Ticket
-    context_object_name= "tickets"
+    context_object_name = "tickets"
 
     def get_queryset(self):
         user = self.request.user
@@ -53,29 +54,29 @@ class CreateTicketView(LoginRequiredMixin, CreateView):
         form.instance.reporter = self.request.user
 
         candidate_agents = User.objects.filter(
-            profile__is_agent=True, 
+            profile__is_agent=True,
             profile__expertise=form.instance.category
-        )
+            )
 
         candidate_agents = candidate_agents.annotate(
             assigned_ticket_count=models.Count('assigned_tickets')
-        ).order_by('assigned_ticket_count')
+            ).order_by('assigned_ticket_count')
 
         if candidate_agents.exists():
             form.instance.assignee = candidate_agents.first()
 
         return super().form_valid(form)
 
+
 class TicketList(LoginRequiredMixin, ListView):
     template_name = "tickets/tickets.html"
     model = Ticket
-    context_object_name= "tickets"
+    context_object_name = "tickets"
 
     def get_queryset(self):
-        
+
         profile = Profile.objects.get(user=self.request.user)
-        
-        
+
         if profile.is_agent:
             return Ticket.objects.filter(assignee=self.request.user)
         else:
@@ -83,9 +84,8 @@ class TicketList(LoginRequiredMixin, ListView):
 
 
 class TicketDetail(LoginRequiredMixin, DetailView):
-    template_name = "tickets/ticket_detail.html" 
+    template_name = "tickets/ticket_detail.html"
     model = Ticket
-
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -95,12 +95,13 @@ class TicketDetail(LoginRequiredMixin, DetailView):
     def post(self, request, *args, **kwargs):
         self.object = self.get_object()
         form = RatingForm(request.POST, instance=self.object)
-        
+
         if form.is_valid():
             form.save()
             return HttpResponseRedirect(self.request.path_info)
 
         return self.render_to_response(self.get_context_data(form=form))
+
 
 class TicketUpdate(LoginRequiredMixin, SuccessMessageMixin, UpdateView):
     model = Ticket
@@ -108,18 +109,20 @@ class TicketUpdate(LoginRequiredMixin, SuccessMessageMixin, UpdateView):
     template_name = "tickets/ticket_detail_update_form.html"
     success_message = "Ticket updated successfully"
 
-
     def get_success_url(self):
-        return reverse("ticket-detail-page", kwargs={"pk":self.object.pk})
-    
+        return reverse("ticket-detail-page", kwargs={"pk": self.object.pk})
+
     def get_form_kwargs(self):
         kwargs = super(TicketUpdate, self).get_form_kwargs()
-        kwargs.update({
-            'user': self.request.user
-        })
-        return kwargs 
-    
-class TicketDelete(LoginRequiredMixin,SuccessMessageMixin, View):
+        kwargs.update(
+            {
+                'user': self.request.user
+                }
+            )
+        return kwargs
+
+
+class TicketDelete(LoginRequiredMixin, SuccessMessageMixin, View):
     def post(self, request, *args, **kwargs):
         try:
             ticket = Ticket.objects.get(pk=self.kwargs.get('pk'))
@@ -130,7 +133,8 @@ class TicketDelete(LoginRequiredMixin,SuccessMessageMixin, View):
                 raise Http404
         except Ticket.DoesNotExist:
             raise Http404
-        
+
+
 class TicketStatistics(LoginRequiredMixin, View):
     template_name = 'tickets/ticket_statistics.html'
 
@@ -143,11 +147,11 @@ class TicketStatistics(LoginRequiredMixin, View):
         resolution_time_data = self.calculate_resolution_times(closed_tickets)
         avg_resolution_per_category = self.calculate_avg_resolution_per_category()
         resolution_time_data_per_ticket = self.calculate_resolution_per_ticket()
-        
-       
 
         status_chart = self.generate_pie_chart(Ticket.objects.values('status').annotate(total=Count('status')))
-        assignee_chart = self.generate_bar_chart(Ticket.objects.values('assignee__username').annotate(total=Count('assignee')))
+        assignee_chart = self.generate_bar_chart(
+            Ticket.objects.values('assignee__username').annotate(total=Count('assignee'))
+            )
         resolution_time_chart = self.generate_resolution_time_chart(resolution_time_data_per_ticket)
 
         context = {
@@ -160,7 +164,7 @@ class TicketStatistics(LoginRequiredMixin, View):
             'min_response_time': response_time_data['min_response_time'].days,
             'max_response_time': response_time_data['max_response_time'].days,
             'resolution_json': resolution_time_chart.to_json()
-        }
+            }
 
         return render(request, self.template_name, context)
 
@@ -170,7 +174,7 @@ class TicketStatistics(LoginRequiredMixin, View):
             average_response_time=Avg('response_time'),
             min_response_time=Min('response_time'),
             max_response_time=Max('response_time')
-        )
+            )
 
     def calculate_resolution_times(self, queryset):
         resolution_times = queryset.annotate(resolution_time=F('time_closed') - F('time_created'))
@@ -178,56 +182,60 @@ class TicketStatistics(LoginRequiredMixin, View):
             average_resolution_time=Avg('resolution_time'),
             min_resolution_time=Min('resolution_time'),
             max_resolution_time=Max('resolution_time')
-        )
+            )
 
     def calculate_avg_resolution_per_category(self):
         avg_resolution_per_category = Ticket.objects.values('category').annotate(
-            avg_resolution_time=Avg(ExpressionWrapper(F('time_closed') - F('time_created'), output_field=DurationField()))
-        )
+            avg_resolution_time=Avg(
+                ExpressionWrapper(F('time_closed') - F('time_created'), output_field=DurationField())
+                )
+            )
 
         return [
             {'category': entry['category'], 'avg_resolution_time': entry['avg_resolution_time'].total_seconds() / 86400}
             for entry in avg_resolution_per_category
-        ]
-    
+            ]
+
     def calculate_resolution_per_ticket(self):
         resolution_per_ticket = Ticket.objects.values('category', 'id').annotate(
             resolution_time=ExpressionWrapper(F('time_closed') - F('time_created'), output_field=DurationField()),
-        )
+            )
 
         return [
             {
                 'category': entry['category'],
                 'ticket_id': entry['id'],
-                'resolution_time': entry['resolution_time'].total_seconds() / 86400 if entry['resolution_time'] is not None else None,
-            } for entry in resolution_per_ticket
-        ]
+                'resolution_time': entry['resolution_time'].total_seconds() / 86400 if entry[
+                                                                                           'resolution_time'] is not None else None,
+                } for entry in resolution_per_ticket
+            ]
 
     def generate_pie_chart(self, data):
         chart = alt.Chart(pd.DataFrame(data)).mark_arc().encode(
             theta='total:Q',
             color='status:N'
-        )
+            )
         return chart
 
     def generate_bar_chart(self, data):
         chart = alt.Chart(pd.DataFrame(data)).mark_bar().encode(
             alt.X('total:Q', axis=alt.Axis(title='Total')),
             alt.Y('assignee__username:N', title='Mpla by category')
-        )
+            )
         return chart
-    
+
     def generate_resolution_time_chart(self, data):
         chart = alt.Chart(pd.DataFrame(data)).mark_point().encode(
             x='category:N',
             y='resolution_time:Q',
             color='category:N',
             tooltip=['resolution_time:Q']
-        ).properties(
+            ).properties(
             title='Resolution Time per Ticket'
-        )
+            )
         return chart
-    
+
+
 class Reports(LoginRequiredMixin, View):
     template_name = 'reports/report.html'
 
@@ -253,33 +261,53 @@ class Reports(LoginRequiredMixin, View):
         total_tickets_in_development = Ticket.objects.filter(status="in development").count()
         total_tickets_open = Ticket.objects.filter(status="open").count()
 
-        most_common_category = Ticket.objects.values('category')\
-            .annotate(category_count=Count('category'))\
-            .order_by('-category_count')\
+        most_common_category = Ticket.objects.values('category') \
+            .annotate(category_count=Count('category')) \
+            .order_by('-category_count') \
             .first()
-        avg_resolution_time = Ticket.objects.filter(status="closed", time_closed__gte=start_date)\
-            .annotate(duration=ExpressionWrapper(F('time_closed') - F('time_in_development'), output_field=DurationField()))\
+        avg_resolution_time = Ticket.objects.filter(status="closed", time_closed__gte=start_date) \
+            .annotate(
+            duration=ExpressionWrapper(F('time_closed') - F('time_in_development'), output_field=DurationField())
+            ) \
             .aggregate(avg_resolution=Avg('duration'))
 
-        avg_response_time = Ticket.objects.filter(status="open", time_created__gte=start_date)\
-            .annotate(duration=ExpressionWrapper(F('time_in_development') - F('time_created'), output_field=DurationField()))\
+        avg_response_time = Ticket.objects.filter(status="open", time_created__gte=start_date) \
+            .annotate(
+            duration=ExpressionWrapper(F('time_in_development') - F('time_created'), output_field=DurationField())
+            ) \
             .aggregate(avg_response=Avg('duration'))
 
-        most_assigned_agent = Ticket.objects.filter(time_created__gte=start_date).values('assignee__profile__user__username').annotate(count=Count('assignee')).order_by('-count').first()
-        
-        fastest_resolving_agent = Ticket.objects.filter(status="closed", time_closed__gte=start_date)\
-            .annotate(duration=ExpressionWrapper(F('time_closed') - F('time_in_development'), output_field=DurationField()))\
-            .values('assignee__profile__user__username')\
-            .annotate(avg_resolution=Avg('duration'))\
+        most_assigned_agent = Ticket.objects.filter(time_created__gte=start_date).values(
+            'assignee__profile__user__username'
+            ).annotate(count=Count('assignee')).order_by('-count').first()
+
+        fastest_resolving_agent = Ticket.objects.filter(status="closed", time_closed__gte=start_date) \
+            .annotate(
+            duration=ExpressionWrapper(F('time_closed') - F('time_in_development'), output_field=DurationField())
+            ) \
+            .values('assignee__profile__user__username') \
+            .annotate(avg_resolution=Avg('duration')) \
             .order_by('avg_resolution').first()
-        most_resolved_agent = Ticket.objects.filter(status="closed", time_closed__gte=start_date).values('assignee__profile__user__username').annotate(count=Count('assignee')).order_by('-count').first()
+        most_resolved_agent = Ticket.objects.filter(status="closed", time_closed__gte=start_date).values(
+            'assignee__profile__user__username'
+            ).annotate(count=Count('assignee')).order_by('-count').first()
 
         # Create a CSV file with the report data
         response = HttpResponse(content_type='text/csv')
         response['Content-Disposition'] = f'attachment; filename="{timespan}_report.csv"'
 
         writer = csv.writer(response)
-        writer.writerow(['Total Tickets','Total Tickets Closed', 'Total Tickets In Development', 'Total Tickets Open', 'Most Common Category', 'Avg Resolution Time', 'Avg Response Time', 'Most Assigned Agent', 'Most Resolved Agent', 'Fastest Resolving Agent'])
-        writer.writerow([total_tickets,total_tickets_closed, total_tickets_in_development, total_tickets_open, most_common_category['category'], avg_resolution_time['avg_resolution'], avg_response_time['avg_response'], most_assigned_agent['assignee__profile__user__username'], most_resolved_agent['assignee__profile__user__username'], fastest_resolving_agent['assignee__profile__user__username']])
+        writer.writerow(
+            ['Total Tickets', 'Total Tickets Closed', 'Total Tickets In Development', 'Total Tickets Open',
+             'Most Common Category', 'Avg Resolution Time', 'Avg Response Time', 'Most Assigned Agent',
+             'Most Resolved Agent', 'Fastest Resolving Agent']
+            )
+        writer.writerow(
+            [total_tickets, total_tickets_closed, total_tickets_in_development, total_tickets_open,
+             most_common_category['category'], avg_resolution_time['avg_resolution'], avg_response_time['avg_response'],
+             most_assigned_agent['assignee__profile__user__username'],
+             most_resolved_agent['assignee__profile__user__username'],
+             fastest_resolving_agent['assignee__profile__user__username']]
+            )
 
         return response

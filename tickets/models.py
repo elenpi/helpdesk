@@ -11,6 +11,7 @@ class Expertise(models.TextChoices):
     BUSINESS = 'business'
     FINANCIAL = 'financial'
 
+
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     is_agent = models.BooleanField(default=False)
@@ -22,10 +23,12 @@ class Profile(models.Model):
     class Meta:
         verbose_name_plural = "Profiles"
 
+
 class Status(models.TextChoices):
     OPEN = 'open'
     CLOSED = 'closed'
     IN_DEVELOPMENT = 'in development'
+
 
 class Ticket(models.Model):
     title = models.CharField(max_length=100)
@@ -41,7 +44,7 @@ class Ticket(models.Model):
 
     def __str__(self):
         return f"{self.title}, {self.status}"
-    
+
     def save(self, *args, **kwargs):
         if self.status == Status.IN_DEVELOPMENT.value and self.time_in_development is None:
             self.time_in_development = timezone.now()
