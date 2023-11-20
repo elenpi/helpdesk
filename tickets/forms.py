@@ -3,6 +3,7 @@ from .models import Ticket
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 
+
 class CustomUserCreationForm(UserCreationForm):
     email = forms.EmailField(required=True)
     first_name = forms.CharField(required=True)
@@ -26,18 +27,20 @@ class CustomUserCreationForm(UserCreationForm):
             user.save()
         return user
 
+
 class CreateTicket(forms.ModelForm):
-     class Meta:
-        model= Ticket
+    class Meta:
+        model = Ticket
         fields = ["title", "description", "category"]
-        labels={
+        labels = {
             "title": "Title",
             "description": "Description",
         }
-        error_messages={
-            "required":"Yout name must be entered",
+        error_messages = {
+            "required": "Yout name must be entered",
             "max_length": "Please enter a shorter name!"
-        } 
+        }
+
 
 class TicketForm(forms.ModelForm):
     class Meta:
@@ -50,12 +53,13 @@ class TicketForm(forms.ModelForm):
         if not self.user.profile.is_agent:
             self.fields.pop('status')
 
+
 class RatingForm(forms.ModelForm):
     RATING_CHOICES = [(str(i), str(i)) for i in range(1, 6)]
 
     rating = forms.ChoiceField(
-        choices=RATING_CHOICES, 
-        label='Rating', 
+        choices=RATING_CHOICES,
+        label='Rating',
         widget=forms.Select(attrs={'class': 'form-control'})
     )
 

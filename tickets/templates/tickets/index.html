@@ -2,41 +2,84 @@
 
 {% block title %}HelpDesk{% endblock %}
 
-{%block content %} 
+{% block content %}
 
-<section id= "welcome">
-    <h1>Welcome to HelpDesk!</h1>
+    <div class="container pb-1">
 
-    <p>
-        Lorem ipsum dolor sit amet consectetur adipisicing elit. Magnam
-        aut sit rem iusto? Deserunt repellat quo autem quas vel aliquid ab dolorum earum
-        eum, unde fugiat non reiciendis reprehenderit suscipit. 
+        <div class="row pt-4">
+            <div class="col">
+                <div class="overflow-hidden mb-3">
+                    <h2 class="font-weight-bold text-8 mb-0 appear-animation" data-appear-animation="maskUp">
+                        Welcome to HelpDesk
+                    </h2>
+                </div>
+            </div>
+        </div>
 
-        Lorem ipsum dolor sit amet consectetur adipisicing elit. Magnam
-        aut sit rem iusto? Deserunt repellat quo autem quas vel aliquid ab dolorum earum
-        eum, unde fugiat non reiciendis reprehenderit suscipit. 
-    </p>
-    
-</section>
+        <div class="row">
+            <div class="col-lg-10">
+                <div class="overflow-hidden">
+                    <p class="lead mb-0 appear-animation" data-appear-animation="maskUp" data-appear-animation-delay="200">
+                        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque rutrum pellentesque imperdiet. Nulla lacinia iaculis nulla non <span
+                            class="alternative-font">metus.</span> pulvinar. Sociis natoque penatibus et magnis dis parturient montes.
+                    </p>
+                </div>
+            </div>
+            <div class="col-lg-2 appear-animation" data-appear-animation="fadeIn" data-appear-animation-delay="500">
+                <a href="{% url 'ticket-creation-page' %}" class="btn btn-modern btn-dark mt-1">Create ticket</a>
+            </div>
+        </div>
 
-<section id="open-tickets">
-    <h1>Your Open Tickets:</h1>
-
-    <div>
-        <ul>
-            {% for ticket in tickets %}
-                <li>
-                    <a href="{% url 'ticket-detail-page' pk=ticket.pk %}">
-                        {{ ticket.title }} (Status: {{ ticket.status }})
-                    </a>
-                </li>
-            {% empty %}
-                <p>There are no open tickets!</p>
-            {% endfor %}
-        </ul>
-    
+        <div class="row">
+            <div class="col py-3">
+                <hr class="solid mt-5 mb-2">
+            </div>
+        </div>
     </div>
-   
-</section>
 
+    <div class="container mt-3">
+
+        <div class="row">
+            <div class="col">
+                <div class="overflow-hidden mb-3">
+                    <h2 class="font-weight-bold text-8 mb-0 appear-animation" data-appear-animation="textEntrance" data-appear-animation-delay="700">
+                        Your Open Tickets:
+                    </h2>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col">
+                <p class="lead mb-0">6 results found.</p>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col mt-1">
+                <hr class="my-4">
+            </div>
+        </div>
+        <div class="row">
+            <div class="col">
+
+                <ul class="simple-post-list m-0">
+                    {% for ticket in tickets %}
+                        <li>
+                            {% comment %}<a href="{% url 'ticket-detail-page' pk=ticket.pk %}">
+                                {{ ticket.title }} (Status: {{ ticket.status }})
+                            </a>{% endcomment %}
+                            <div class="post-info">
+                                <a href="{% url 'ticket-detail-page' pk=ticket.pk %}">{{ ticket.title }}</a>
+                                <div class="post-meta">
+                                    <span class="text-dark font-weight-semibold">{{ ticket.category }}</span> | ({{ ticket.status }})
+                                </div>
+                            </div>
+                        </li>
+                    {% empty %}
+                        <p>There are no open tickets!</p>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
 {% endblock %}

@@ -52,7 +52,7 @@
                     <div class="header-column">
                         <div class="header-row">
                             <div class="header-logo">
-                                <a href="index.html">
+                                <a href="{% url 'landing-page' %}">
                                     <img alt="Porto" width="100" height="48" data-sticky-width="82" data-sticky-height="40" data-sticky-top="0"
                                          src="{% static "img/logo-default-slim.png" %}">
                                 </a>
@@ -122,82 +122,7 @@
             </div>
         </div>
     </div>
-
-    <footer id="footer" class="footer-texts-more-lighten">
-        <div class="container">
-            <div class="row py-4 my-5">
-                <div class="col-md-6 col-lg-4 mb-5 mb-lg-0">
-                    <h5 class="text-4 text-color-light mb-3">CONTACT INFO</h5>
-                    <ul class="list list-unstyled">
-                        <li class="pb-1 mb-2">
-                            <span class="d-block font-weight-normal line-height-1 text-color-light">ADDRESS</span>
-                            1234 Street Name, City, State, USA
-                        </li>
-                        <li class="pb-1 mb-2">
-                            <span class="d-block font-weight-normal line-height-1 text-color-light">PHONE</span>
-                            <a href="tel:+1234567890">Toll Free (123) 456-7890</a>
-                        </li>
-                        <li class="pb-1 mb-2">
-                            <span class="d-block font-weight-normal line-height-1 text-color-light">EMAIL</span>
-                            <a href="mailto:mail@example.com">mail@example.com</a>
-                        </li>
-                        <li class="pb-1 mb-2">
-                            <span class="d-block font-weight-normal line-height-1 text-color-light">WORKING DAYS/HOURS </span>
-                            Mon - Sun / 9:00AM - 8:00PM
-                        </li>
-                    </ul>
-                    <ul class="social-icons social-icons-clean-with-border social-icons-medium">
-                        <li class="social-icons-instagram">
-                            <a href="http://www.instagram.com/" class="no-footer-css" target="_blank" title="Instagram"><i class="fab fa-instagram"></i></a>
-                        </li>
-                        <li class="social-icons-twitter mx-2">
-                            <a href="http://www.twitter.com/" class="no-footer-css" target="_blank" title="Twitter"><i class="fab fa-twitter"></i></a>
-                        </li>
-                        <li class="social-icons-facebook">
-                            <a href="http://www.facebook.com/" class="no-footer-css" target="_blank" title="Facebook"><i class="fab fa-facebook-f"></i></a>
-                        </li>
-                    </ul>
-                </div>
-                <div class="col-md-6 col-lg-3 mb-5 mb-lg-0">
-                    <h5 class="text-4 text-color-light mb-3">USEFUL LINKS</h5>
-                    <ul class="list list-unstyled mb-0">
-                        <li class="mb-0"><a href="contact-us-1.html">Help Center</a></li>
-                        <li class="mb-0"><a href="about-us.html">About Us</a></li>
-                        <li class="mb-0"><a href="contact-us.html">Contact Us</a></li>
-                        <li class="mb-0"><a href="page-careers.html">Careers</a></li>
-                        <li class="mb-0"><a href="blog-grid-4-columns.html">Blog</a></li>
-                        <li class="mb-0"><a href="#">Our Location</a></li>
-                        <li class="mb-0"><a href="#">Privacy Policy</a></li>
-                        <li class="mb-0"><a href="sitemap.html">Sitemap</a></li>
-                    </ul>
-                </div>
-                <div class="col-md-6 col-lg-5 mb-5 mb-md-0">
-                    <h5 class="text-4 text-color-light mb-3">RECENT NEWS</h5>
-                    <article class="mb-3">
-                        <a href="blog-post.html" class="text-color-light text-3-5">Why should I buy a Web Template?</a>
-                        <p class="line-height-2 mb-0"><a href="#">Nov 25, 2020</a> in <a href="#">Design,</a> <a href="#">Coding</a></p>
-                    </article>
-                    <article class="mb-3">
-                        <a href="blog-post.html" class="text-color-light text-3-5">Creating Amazing Website with Porto</a>
-                        <p class="line-height-2 mb-0"><a href="#">Nov 25, 2020</a> in <a href="#">Design,</a> <a href="#">Coding</a></p>
-                    </article>
-                    <article>
-                        <a href="blog-post.html" class="text-color-light text-3-5">Best Practices for Top UI Design</a>
-                        <p class="line-height-2 mb-0"><a href="#">Nov 25, 2020</a> in <a href="#">Design,</a> <a href="#">Coding</a></p>
-                    </article>
-                </div>
-            </div>
-        </div>
-        <div class="container">
-            <div class="footer-copyright footer-copyright-style-2 pt-4 pb-5">
-                <div class="row">
-                    <div class="col-12 text-center">
-                        <p class="mb-0">HelpDesk © 2023</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </footer>
+    {% include 'partial/_footer.html' %}
 </div>
 <!-- Vendor -->
 <script src="{% static "vendor/plugins/js/plugins.min.js" %}"></script>

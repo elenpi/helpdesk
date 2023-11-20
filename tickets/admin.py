@@ -11,15 +11,19 @@ class ProfileAdmin(admin.ModelAdmin):
 
     def username(self, obj):
         return obj.user.username
-    username.short_description = 'username' 
+
+    username.short_description = 'username'
 
     def first_name(self, obj):
         return obj.user.first_name
+
     first_name.short_description = 'first name'
 
     def last_name(self, obj):
         return obj.user.last_name
+
     last_name.short_description = 'last name'
+
 
 class TicketAdmin(admin.ModelAdmin):
     list_display = ('title', 'status', 'category', 'reporter_username',
@@ -27,10 +31,12 @@ class TicketAdmin(admin.ModelAdmin):
 
     def reporter_username(self, obj):
         return obj.reporter.username
+
     reporter_username.short_description = 'reporter'
 
     def assignee_username(self, obj):
         return obj.assignee.username if obj.assignee else None
+
     assignee_username.short_description = 'assignee'
 
 
