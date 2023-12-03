@@ -4,19 +4,46 @@
 
 {% block content %}
 
-<h1>All Tickets:</h1>
+    <div class="container pb-1 mt-5">
+        <div class="row">
+            <div class="col">
+                <div class="overflow-hidden mb-3">
+                    <h2 class="font-weight-bold text-8 mb-0 appear-animation" data-appear-animation="textEntrance" data-appear-animation-delay="700">
+                        All Tickets:
+                    </h2>
+                </div>
+            </div>
+        </div>
 
-<div>
+        <div class="row">
+            <div class="col">
+                <ul class="simple-post-list m-0">
+                    {% for ticket in tickets %}
+                        <li>
+                            {% comment %}<a href="{% url 'ticket-detail-page' pk=ticket.pk %}">
+                                {{ ticket.title }} (Status: {{ ticket.status }})
+                            </a>{% endcomment %}
+                            <div class="post-info">
+                                <a href="{% url 'ticket-detail-page' pk=ticket.pk %}">{{ ticket.title }}</a>
+                                <div class="post-meta">
+                                    <span class="text-dark font-weight-semibold">{{ ticket.category }}</span> | ({{ ticket.status }})
+                                </div>
+                            </div>
+                        </li>
+                    {% empty %}
+                        <p>There are no open tickets!</p>
+                    {% endfor %}
+                </ul>
+            </div>
+            {% comment %}<ul>
+                {% for ticket in tickets %}
+                    <a href="{% url 'ticket-detail-page' pk=ticket.pk %}">
+                        <li>{{ ticket.title }} (Status: {{ ticket.status }})</li>
+                    </a>
+                {% endfor %}
+            </ul>{% endcomment %}
 
-    <ul>
-        {% for ticket in tickets %}
-        <a href="{% url 'ticket-detail-page' pk=ticket.pk %}">
-            <li>{{ ticket.title }} (Status: {{ ticket.status }})</li>
-        </a>
-        {% endfor %}
-    
-    </ul>
-
-</div>
+        </div>
+    </div>
 
 {% endblock %}

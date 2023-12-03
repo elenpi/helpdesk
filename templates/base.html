@@ -49,7 +49,7 @@
     <header id="header" class="header-effect-shrink"
             data-plugin-options="{'stickyEnabled': true, 'stickyEffect': 'shrink', 'stickyEnableOnBoxed': true, 'stickyEnableOnMobile': false, 'stickyChangeLogo': true, 'stickyStartAt': 120, 'stickyHeaderContainerHeight': 70}">
         <div class="header-body border-color-primary header-body-bottom-border">
-            <div class="header-top header-top-default border-bottom-0">
+            {% comment %}<div class="header-top header-top-default border-bottom-0">
                 <div class="container">
                     <div class="header-row py-2">
                         <div class="header-column justify-content-start">
@@ -84,14 +84,25 @@
                         </div>
                     </div>
                 </div>
-            </div>
+            </div>{% endcomment %}
             <div class="header-container container">
                 <div class="header-row">
                     <div class="header-column">
                         <div class="header-row">
                             <div class="header-logo">
                                 <a href="{% url 'landing-page' %}">
-                                    <img alt="Porto" width="100" height="48" src="{% static "img/logo-default-slim.png" %}">
+                                    {#<img alt="Porto" width="100" height="48" src="{% static "img/logo-default-slim.png" %}">#}
+                                    <h2 class="font-weight-semibold text-9 line-height-6 mt-3 mb-2">
+                                        <em class="p-relative z-index-1 fst-normal">HelpDesk
+                                            <span class="appear-animation animated highlightScribble1 appear-animation-visible"
+                                                  data-appear-animation="highlightScribble1" style="animation-delay: 100ms;">
+                                                <svg class="highlight-scribble-1" viewBox="0 0 760 60" preserveAspectRatio="none">
+                                                    <path d="M5.29,45c58.45-36.43,84.27-39.17,96-31.55s5.8,23.19,18,28.92C141.93,53,179,7.19,208.29,17.83c15.37,5.59,11.78,20.65,27,24.54,24.36,6.23,46.68-29,69-21.91,13.54,4.29,11.14,19.09,24,21.91,18.79,4.12,32.62-25.58,56-24.54,17,.76,16.64,21.9,34,24.54,21.69,3.31,34.42-25.43,57-21.91,15.25,2.38,15.08,16.37,30,18.41,22.32,3.05,34.49-26.64,56-23.66,16.75,2.31,17.76,21.47,34,22.78,17.87,1.44,25.48-21.06,45-21.91,9.48-.41,22.55,4.24,39,25.41"
+                                                          stroke="#0088cc" pathLength="1" stroke-width="14" fill="none"></path>
+                                                </svg>
+                                            </span>
+                                        </em>
+                                    </h2>
                                 </a>
                             </div>
                         </div>
@@ -103,12 +114,21 @@
                                     {% include 'partial/_nav.html' %}
                                 </div>
                                 <ul class="header-social-icons social-icons d-none d-sm-block">
-                                    <li class="social-icons-facebook"><a href="http://www.facebook.com/" target="_blank" title="Facebook"><i
-                                            class="fab fa-facebook-f"></i></a></li>
-                                    <li class="social-icons-twitter"><a href="http://www.twitter.com/" target="_blank" title="Twitter"><i
-                                            class="fab fa-twitter"></i></a></li>
-                                    <li class="social-icons-linkedin"><a href="http://www.linkedin.com/" target="_blank" title="Linkedin"><i
-                                            class="fab fa-linkedin-in"></i></a></li>
+                                    <li class="social-icons-facebook">
+                                        <a href="http://www.facebook.com/" target="_blank" title="Facebook">
+                                            <i class="fab fa-facebook-f"></i>
+                                        </a>
+                                    </li>
+                                    <li class="social-icons-twitter">
+                                        <a href="http://www.twitter.com/" target="_blank" title="Twitter">
+                                            <i class="fab fa-twitter"></i>
+                                        </a>
+                                    </li>
+                                    <li class="social-icons-linkedin">
+                                        <a href="http://www.linkedin.com/" target="_blank" title="Linkedin">
+                                            <i class="fab fa-linkedin-in"></i>
+                                        </a>
+                                    </li>
                                 </ul>
                                 <button class="btn header-btn-collapse-nav" data-bs-toggle="collapse" data-bs-target=".header-nav-main nav">
                                     <i class="fas fa-bars"></i>
@@ -129,38 +149,7 @@
                                         </form>
                                     </div>
                                 </div>
-                                <div class="header-nav-feature header-nav-features-cart d-inline-flex ms-2">
-                                    <a href="#" class="header-nav-features-toggle" aria-label="">
-                                        <img src="img/icons/icon-cart.svg" width="14" alt="" class="header-nav-top-icon-img">
-                                        <span class="cart-info d-none">
-													<span class="cart-qty">1</span>
-												</span>
-                                    </a>
-                                    <div class="header-nav-features-dropdown" id="headerTopCartDropdown">
-                                        <ol class="mini-products-list">
-                                            <li class="item">
-                                                <a href="#" title="Camera X1000" class="product-image"><img src="img/products/product-1.jpg" alt="Camera X1000"></a>
-                                                <div class="product-details">
-                                                    <p class="product-name">
-                                                        <a href="#">Camera X1000 </a>
-                                                    </p>
-                                                    <p class="qty-price">
-                                                        1X <span class="price">$890</span>
-                                                    </p>
-                                                    <a href="#" title="Remove This Item" class="btn-remove"><i class="fas fa-times"></i></a>
-                                                </div>
-                                            </li>
-                                        </ol>
-                                        <div class="totals">
-                                            <span class="label">Total:</span>
-                                            <span class="price-total"><span class="price">$890</span></span>
-                                        </div>
-                                        <div class="actions">
-                                            <a class="btn btn-dark" href="#">View Cart</a>
-                                            <a class="btn btn-primary" href="#">Checkout</a>
-                                        </div>
-                                    </div>
-                                </div>
+
                             </div>
                         </div>
                     </div>

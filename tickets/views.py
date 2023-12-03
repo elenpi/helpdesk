@@ -39,9 +39,14 @@ class OpenTicketsList(LoginRequiredMixin, ListView):
 
     def get_queryset(self):
         user = self.request.user
+
+        tickets = Ticket.objects.filter(reporter=user, status__in=["open", "in development"])
         if user.profile.is_agent:
-            return Ticket.objects.filter(assignee=user, status__in=["open", "in development"])
-        return Ticket.objects.filter(reporter=user, status__in=["open", "in development"])
+            tickets = Ticket.objects.filter(assignee=user, status__in=["open", "in development"])
+
+        # total = len(tickets)
+        # return {tickets: tickets, total: total}
+        return tickets
 
 
 class CreateTicketView(LoginRequiredMixin, CreateView):
