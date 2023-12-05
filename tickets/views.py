@@ -151,13 +151,15 @@ class TicketStatistics(LoginRequiredMixin, View):
         response_time_data = self.calculate_response_times(in_development_tickets)
         resolution_time_data = self.calculate_resolution_times(closed_tickets)
         avg_resolution_per_category = self.calculate_avg_resolution_per_category()
+        avg_rating_closed_tickets = closed_tickets.aggregate(avg_rating=Avg('rating'))
         resolution_time_data_per_ticket = self.calculate_resolution_per_ticket()
+        avg_rating_per_assignee = self.calculate_avg_rating_per_assignee()
+    
 
         status_chart = self.generate_pie_chart(Ticket.objects.values('status').annotate(total=Count('status')))
-        assignee_chart = self.generate_bar_chart(
-            Ticket.objects.values('assignee__username').annotate(total=Count('assignee'))
-        )
+        assignee_chart = self.generate_assignee_bar_chart(Ticket.objects.values('assignee__username').annotate(total=Count('assignee')))
         resolution_time_chart = self.generate_resolution_time_chart(resolution_time_data_per_ticket)
+        avg_rating_chart = self.generate_rating_bar_chart(avg_rating_per_assignee, title='Average Rating per Assignee')
 
         context = {
             'status_json': status_chart.to_json(),
@@ -168,7 +170,9 @@ class TicketStatistics(LoginRequiredMixin, View):
             'response_time': response_time_data['average_response_time'].days,
             'min_response_time': response_time_data['min_response_time'].days,
             'max_response_time': response_time_data['max_response_time'].days,
-            'resolution_json': resolution_time_chart.to_json()
+            'avg_rating_closed_tickets': avg_rating_closed_tickets['avg_rating'], 
+            'resolution_json': resolution_time_chart.to_json(),
+            'avg_rating_per_assignee_json': avg_rating_chart.to_json()
         }
 
         return render(request, self.template_name, context)
@@ -214,6 +218,27 @@ class TicketStatistics(LoginRequiredMixin, View):
                                                                                            'resolution_time'] is not None else None,
             } for entry in resolution_per_ticket
         ]
+    def calculate_avg_rating_per_assignee(self):
+        avg_rating_per_assignee = Ticket.objects.values('assignee__username').annotate(
+            avg_rating=Avg('rating')
+        )
+
+        return [
+            {
+                'assignee': entry['assignee__username'],
+                'avg_rating': entry['avg_rating'] if entry['avg_rating'] is not None else 0
+            }
+            for entry in avg_rating_per_assignee
+        ]
+    
+    def generate_rating_bar_chart(self, data, title=''):
+        chart = alt.Chart(pd.DataFrame(data)).mark_bar().encode(
+            alt.X('avg_rating:Q', axis=alt.Axis(title='Average Rating')),
+            alt.Y('assignee:N', title='Assignee'),
+        ).properties(
+            title=title
+        )
+        return chart
 
     def generate_pie_chart(self, data):
         chart = alt.Chart(pd.DataFrame(data)).mark_arc().encode(
@@ -222,7 +247,7 @@ class TicketStatistics(LoginRequiredMixin, View):
         )
         return chart
 
-    def generate_bar_chart(self, data):
+    def generate_assignee_bar_chart(self, data):
         chart = alt.Chart(pd.DataFrame(data)).mark_bar().encode(
             alt.X('total:Q', axis=alt.Axis(title='Total')),
             alt.Y('assignee__username:N', title='Mpla by category')
@@ -250,69 +275,77 @@ class Reports(LoginRequiredMixin, View):
     def post(self, request):
         timespan = request.POST.get('timespan')
 
-        today = timezone.now()
         if timespan == 'daily':
-            start_date = today - timezone.timedelta(days=1)
+            period = 'days'
         elif timespan == 'weekly':
-            start_date = today - timezone.timedelta(weeks=1)
+            period = 'weeks'
         elif timespan == 'monthly':
-            start_date = today - timezone.timedelta(weeks=4)
+            period = 'months'
         else:
             return HttpResponse("Invalid timespan")
-
-        # Query the database to get the required data for the report
-        total_tickets = Ticket.objects.count()
-        total_tickets_closed = Ticket.objects.filter(status="closed").count()
-        total_tickets_in_development = Ticket.objects.filter(status="in development").count()
-        total_tickets_open = Ticket.objects.filter(status="open").count()
-
-        most_common_category = Ticket.objects.values('category') \
-            .annotate(category_count=Count('category')) \
-            .order_by('-category_count') \
-            .first()
-        avg_resolution_time = Ticket.objects.filter(status="closed", time_closed__gte=start_date) \
-            .annotate(
-            duration=ExpressionWrapper(F('time_closed') - F('time_in_development'), output_field=DurationField())
-        ) \
-            .aggregate(avg_resolution=Avg('duration'))
-
-        avg_response_time = Ticket.objects.filter(status="open", time_created__gte=start_date) \
-            .annotate(
-            duration=ExpressionWrapper(F('time_in_development') - F('time_created'), output_field=DurationField())
-        ) \
-            .aggregate(avg_response=Avg('duration'))
-
-        most_assigned_agent = Ticket.objects.filter(time_created__gte=start_date).values(
-            'assignee__profile__user__username'
-        ).annotate(count=Count('assignee')).order_by('-count').first()
-
-        fastest_resolving_agent = Ticket.objects.filter(status="closed", time_closed__gte=start_date) \
-            .annotate(
-            duration=ExpressionWrapper(F('time_closed') - F('time_in_development'), output_field=DurationField())
-        ) \
-            .values('assignee__profile__user__username') \
-            .annotate(avg_resolution=Avg('duration')) \
-            .order_by('avg_resolution').first()
-        most_resolved_agent = Ticket.objects.filter(status="closed", time_closed__gte=start_date).values(
-            'assignee__profile__user__username'
-        ).annotate(count=Count('assignee')).order_by('-count').first()
-
+        
         # Create a CSV file with the report data
         response = HttpResponse(content_type='text/csv')
         response['Content-Disposition'] = f'attachment; filename="{timespan}_report.csv"'
 
         writer = csv.writer(response)
-        writer.writerow(
-            ['Total Tickets', 'Total Tickets Closed', 'Total Tickets In Development', 'Total Tickets Open',
-             'Most Common Category', 'Avg Resolution Time', 'Avg Response Time', 'Most Assigned Agent',
-             'Most Resolved Agent', 'Fastest Resolving Agent']
-        )
-        writer.writerow(
-            [total_tickets, total_tickets_closed, total_tickets_in_development, total_tickets_open,
-             most_common_category['category'], avg_resolution_time['avg_resolution'], avg_response_time['avg_response'],
-             most_assigned_agent['assignee__profile__user__username'],
-             most_resolved_agent['assignee__profile__user__username'],
-             fastest_resolving_agent['assignee__profile__user__username']]
-        )
+        writer.writerow(['Period', 'Total Tickets', 'Total Tickets Closed', 'Total Tickets In Development', 'Total Tickets Open', 'Most Common Category', 'Avg Resolution Time', 'Avg Response Time', 'Most Assigned Agent', 'Most Resolved Agent', 'Fastest Resolving Agent'])
+
+        today = timezone.now()
+
+        for i in range(3):
+            if period == 'days':
+                start_date = today - timezone.timedelta(days=i+1)
+                end_date = start_date + timezone.timedelta(days=1)
+            elif period == 'weeks':
+                start_date = today - timezone.timedelta(weeks=i+1)
+                end_date = start_date + timezone.timedelta(weeks=1)
+            else: # period == 'months'
+                start_date = today - timezone.timedelta(weeks=(i+1)*4)
+                end_date = start_date + timezone.timedelta(weeks=4)
+
+            totals = self.calculate_totals(start_date, end_date)
+            writer.writerow([i+1, *totals])  # i+1 is the period number (1, 2, or 3)
 
         return response
+
+    def calculate_totals(self, start_date, end_date):
+        total_tickets = Ticket.objects.filter(time_created__range=(start_date, end_date)).count()
+
+        total_tickets_closed = Ticket.objects.filter(status="closed", time_closed__range=(start_date, end_date)).count()
+
+        total_tickets_in_development = Ticket.objects.filter(status="in development", time_in_development__range=(start_date, end_date)).count()
+
+        total_tickets_open = total_tickets - total_tickets_in_development - total_tickets_closed
+
+        most_common_category = Ticket.objects.filter(time_created__range=(start_date, end_date))\
+            .values('category')\
+            .annotate(category_count=Count('category'))\
+            .order_by('-category_count')\
+            .first()
+        category = most_common_category['category'] if most_common_category else '-'
+
+        avg_resolution_time = Ticket.objects.filter(status="closed", time_closed__range=(start_date, end_date))\
+            .annotate(duration=ExpressionWrapper(F('time_closed') - F('time_in_development'), output_field=DurationField()))\
+            .aggregate(avg_resolution=Avg('duration'))['avg_resolution'] or '-'
+
+        avg_response_time = Ticket.objects.filter(status="in development", time_created__range=(start_date, end_date))\
+            .annotate(duration=ExpressionWrapper(F('time_in_development') - F('time_created'), output_field=DurationField()))\
+            .aggregate(avg_response=Avg('duration'))['avg_response'] or '-'
+
+        most_assigned_agent = Ticket.objects.filter(time_created__range=(start_date, end_date)).values('assignee__profile__user__username').annotate(count=Count('assignee')).order_by('-count').first()
+        most_assigned_agent = most_assigned_agent['assignee__profile__user__username'] if most_assigned_agent else '-'
+
+        fastest_resolving_agent = Ticket.objects.filter(status="closed", time_closed__range=(start_date, end_date))\
+            .annotate(duration=ExpressionWrapper(F('time_closed') - F('time_created'), output_field=DurationField()))\
+            .values('assignee__profile__user__username')\
+            .annotate(avg_resolution=Avg('duration'))\
+            .order_by('avg_resolution').first()
+        fastest_resolving_agent = fastest_resolving_agent['assignee__profile__user__username'] if fastest_resolving_agent else '-'
+        
+        most_resolved_agent = Ticket.objects.filter(status="closed", time_closed__range=(start_date, end_date)).values('assignee__profile__user__username').annotate(count=Count('assignee')).order_by('-count').first()
+        most_resolved_agent = most_resolved_agent['assignee__profile__user__username'] if most_resolved_agent else '-'
+
+        totals = [total_tickets, total_tickets_closed, total_tickets_in_development, total_tickets_open, category, avg_resolution_time, avg_response_time, most_assigned_agent, most_resolved_agent, fastest_resolving_agent]
+
+        return totals

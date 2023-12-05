@@ -58,30 +58,35 @@
             </div>
         </div>
 
-        <div class="ticket-stat-box">
-            <p>Average Resolution Time: {{ resolution_time }}</p>
-            <p>Minimun Resolution Time: {{ min_resolution_time }}</p>
-            <p>Maximum Resolution Time: {{ max_resolution_time }}</p>
-            <p>Average Response Time: {{ response_time }}</p>
-            <p>Minimun Response Time: {{ min_response_time }}</p>
-            <p>Maximum Response Time: {{ max_response_time }}</p>
-        </div>
+<div class="ticket-stat-box">
+    <p>Average Resolution Time: {{resolution_time}}</p>
+    <p>Minimun Resolution Time: {{min_resolution_time}}</p>
+    <p>Maximum Resolution Time: {{max_resolution_time}}</p>
+    <p>Average Response Time: {{response_time}}</p>
+    <p>Minimun Response Time: {{min_response_time}}</p>
+    <p>Maximum Response Time: {{max_response_time}}</p>
+    <p>Average Rating of Closed Tickets: {{avg_rating_closed_tickets}}/5</p>
+</div>
 
-        <div class="chart-container">
-            <div id="status-chart" class="chart"></div>
-            <div id="assignee-chart" class="chart"></div>
-            <div id="resolution-chart" class="chart"></div>
-        </div>
+<div class="chart-container">
+    <div id="status-chart" class="chart"></div>
+    <div id="assignee-chart" class="chart"></div>
+    <div id="resolution-chart" class="chart"></div>
+    <div id="rating-chart" class = "chart"></div>
+</div>
 
-        <script type="text/javascript">
-            var statusSpec = {{ status_json | safe }};
-            var assigneeSpec = {{ assignee_json | safe }};
-            var resolutionSpec = {{ resolution_json | safe }};
-            vegaEmbed('#status-chart', statusSpec);
-            vegaEmbed('#assignee-chart', assigneeSpec);
-            vegaEmbed('#resolution-chart', resolutionSpec);
-        </script>
-    </div>
+
+  <script type="text/javascript">
+      var statusSpec = {{ status_json | safe }};
+      var assigneeSpec = {{ assignee_json | safe }};
+      var resolutionSpec = {{ resolution_json | safe }};
+      var ratingSpec = {{avg_rating_per_assignee_json | safe}}
+      vegaEmbed('#status-chart', statusSpec);
+      vegaEmbed('#assignee-chart', assigneeSpec);
+      vegaEmbed('#resolution-chart', resolutionSpec);
+      vegaEmbed('#rating-chart', ratingSpec);
+  </script>
+
 {% endblock %}
 
 {% block javascript %}
