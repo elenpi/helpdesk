@@ -3,16 +3,24 @@
 {% block title %}Edit Ticket{% endblock %}
 
 {% block content %}
+    <div class="container pb-1 mt-5">
+        <form action="" method="POST">
 
-<form action=""  method="POST">
-    {% csrf_token %}
-    {% for field in form %}
-        <div class="form-control {% if field.errors %} errors {% endif %}">
-            {{ field.label_tag }}
-            {{ field }}
-            {{ field.errors }}
+            {% csrf_token %}
+            {% for field in form %}
+                <div class="form-control {% if field.errors %} errors {% endif %}">
+                    {{ field.label_tag }}
+                    {{ field }}
+                    {{ field.errors }}
+                </div>
+            {% endfor %}
+            <div class="row">
+                <div class="form-group col">
+                    <button type="submit" class="btn btn-primary w-100 text-uppercase rounded-0 font-weight-bold text-3 py-3"
+                            data-loading-text="Save...">Save Changes
+                    </button>
+                </div>
+            </div>
+        </form>
     </div>
-    {% endfor %}
-    <button type="submit">Save Changes</button>
-
 {% endblock %}
