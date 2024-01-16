@@ -12793,9 +12793,10 @@ html body .rounded-circle {
 	background: var(--dark);
 	border-top: 4px solid var(--dark);
 	font-size: 0.9em;
-	margin-top: 50px;
 	padding: 0;
-	position: relative;
+	position: fixed;
+    bottom: 0;
+    width: 100%;
 	clear: both;
 }
 

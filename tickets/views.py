@@ -37,6 +37,11 @@ class OpenTicketsList(LoginRequiredMixin, ListView):
     model = Ticket
     context_object_name = "tickets"
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['ticket_count'] = self.get_queryset().count()
+        return context
+
     def get_queryset(self):
         user = self.request.user
 

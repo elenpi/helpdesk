@@ -13,7 +13,7 @@ class CustomUserCreationForm(UserCreationForm):
         model = User
         fields = ("username", "first_name", "last_name", "email", "password1", "password2")
         help_texts = {
-            'username': None,
+            'username': "This is the unique identifier for each user",
             'password1': None,
             'password2': None,
         }
@@ -31,7 +31,7 @@ class CustomUserCreationForm(UserCreationForm):
 class CreateTicket(forms.ModelForm):
     class Meta:
         model = Ticket
-        fields = ["title", "description", "category"]
+        fields = ["title", "category", "description"]
         labels = {
             "title": "Title",
             "description": "Description",

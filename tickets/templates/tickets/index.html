@@ -10,7 +10,7 @@
             <div class="col">
                 <div class="overflow-hidden mb-3">
                     <h2 class="font-weight-bold text-8 mb-0 appear-animation" data-appear-animation="maskUp">
-                        Welcome to HelpDesk
+                        Welcome!
                     </h2>
                 </div>
             </div>
@@ -20,9 +20,12 @@
             <div class="col-lg-10">
                 <div class="overflow-hidden">
                     <p class="lead mb-0 appear-animation" data-appear-animation="maskUp" data-appear-animation-delay="200">
-                        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque rutrum pellentesque imperdiet. Nulla lacinia iaculis nulla non <span
-                            class="alternative-font">metus.</span> pulvinar. Sociis natoque penatibus et magnis dis parturient montes.
-                    </p>
+                        Welcome to <span
+                            class="alternative-font">HelpDesk.</span>- your solution for fast and efficient customer service. <br> 
+                            Our easy-to-use platform ensures quick resolution of your technical queries and support needs. <br>
+                            Submit ticket and track progress, all in one place. <br>
+                            Experience hassle-free support with HepDesk!
+                        </p>
                 </div>
             </div>
             <div class="col-lg-2 appear-animation" data-appear-animation="fadeIn" data-appear-animation-delay="500">
@@ -51,7 +54,15 @@
 
         <div class="row">
             <div class="col">
-                <p class="lead mb-0">6 tickets found.</p>
+                <p class="lead mb-0">
+                    {% if tickets.count == 1 %}
+                        1 ticket found.
+                    {% elif tickets.count > 1 %}
+                        {{ tickets.count }} tickets found.
+                    {% else %}
+                        No tickets found.
+                    {% endif %}
+                </p>
             </div>
         </div>
         <div class="row">

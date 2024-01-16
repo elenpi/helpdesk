@@ -8730,6 +8730,7 @@ hr.pattern.pattern-2:after, .divider.pattern.pattern-2:after {
 /* Forms */
 form label {
 	font-weight: normal;
+	display: block;
 }
 
 textarea {

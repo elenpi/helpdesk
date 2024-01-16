@@ -9,21 +9,29 @@
             <a class="dropdown-item dropdown-toggle" href="{% url 'tickets-page' %}">
                 My tickets
             </a>
+        </li>
+        {% if request.user.profile.is_agent %}
+        <li class="dropdown">
+            <a class="dropdown-item dropdown-toggle" href="#">
+                Overview
+            </a>
             <ul class="dropdown-menu">
-                {% if request.user.profile.is_agent %}
                     <li class="dropdown">
                         <a class="dropdown-item" href="{% url 'tickets-statistics' %}">Statistics</a>
                     </li>
                     <li class="dropdown">
                         <a class="dropdown-item" href="{% url 'tickets-report' %}">Reports</a>
                     </li>
-                {% else %}
-                    <li class="dropdown">
-                        <a class="dropdown-item" href="{% url 'ticket-creation-page' %}">Create Ticket</a>
-                    </li>
-                {% endif %}
             </ul>
         </li>
+        {% endif %}
+        {% if not request.user.profile.is_agent %}
+        <li class="dropdown">
+            <a class="dropdown-item dropdown-toggle" href="{% url 'ticket-creation-page' %}">
+                Create Ticket
+            </a>
+        </li>
+        {% endif %}
         <li class="dropdown">
             <a class="dropdown-item dropdown-toggle" href="{% url 'logout' %}">
                 Logout
