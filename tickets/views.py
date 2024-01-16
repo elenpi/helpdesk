@@ -4,6 +4,7 @@ import csv
 from django.utils import timezone
 from django.shortcuts import render
 from django.contrib.auth.mixins import LoginRequiredMixin
+from datetime import timedelta
 
 import altair as alt
 import datapane as dp
@@ -17,7 +18,7 @@ from django.urls import reverse, reverse_lazy
 from django.http import Http404, JsonResponse, HttpResponse, HttpResponseRedirect
 
 from .forms import CreateTicket, CustomUserCreationForm, TicketForm, RatingForm
-from .models import Ticket, User, Profile
+from .models import Ticket, User, Profile, Status
 
 
 # Create your views here.
@@ -148,8 +149,21 @@ class TicketDelete(LoginRequiredMixin, SuccessMessageMixin, View):
 class TicketStatistics(LoginRequiredMixin, View):
     template_name = 'tickets/ticket_statistics.html'
 
+    def stringify_timedelta(self, td):
+        days, remainder = divmod(td.seconds + td.days * 86400, 86400)
+        hours, remainder = divmod(remainder, 3600)
+        minutes, seconds = divmod(remainder, 60)
+        if days > 0:
+            return '%d d, %d h, %d m' % (days, hours, minutes)
+        elif hours > 0:
+            return '%d h, %d m' % (hours, minutes)
+        elif minutes > 0:
+            return '%d m, %d s' % (minutes, seconds)
+        else:
+            return '%d s' % (seconds)
+
+
     def get(self, request, *args, **kwargs):
-        open_tickets = Ticket.objects.filter(status="open")
         in_development_tickets = Ticket.objects.filter(status="in development")
         closed_tickets = Ticket.objects.filter(status="closed")
 
@@ -159,25 +173,36 @@ class TicketStatistics(LoginRequiredMixin, View):
         avg_rating_closed_tickets = closed_tickets.aggregate(avg_rating=Avg('rating'))
         resolution_time_data_per_ticket = self.calculate_resolution_per_ticket()
         avg_rating_per_assignee = self.calculate_avg_rating_per_assignee()
-    
+        tickets_per_category = self.calculate_tickets_per_category()
+        resolution_time_per_ticket = self.calculate_resolution_time_per_ticket()
+        pending_tickets = Ticket.objects.filter(status="in development").count()
+        open_tickets = Ticket.objects.filter(status=Status.OPEN.value).count()
 
         status_chart = self.generate_pie_chart(Ticket.objects.values('status').annotate(total=Count('status')))
         assignee_chart = self.generate_assignee_bar_chart(Ticket.objects.values('assignee__username').annotate(total=Count('assignee')))
         resolution_time_chart = self.generate_resolution_time_chart(resolution_time_data_per_ticket)
         avg_rating_chart = self.generate_rating_bar_chart(avg_rating_per_assignee, title='Average Rating per Assignee')
+        tickets_per_category_chart = self.generate_tickets_per_category_chart(tickets_per_category)
+        resolution_time_per_ticket_chart = self.generate_resolution_time_per_ticket_chart(resolution_time_per_ticket)
+
+        
 
         context = {
             'status_json': status_chart.to_json(),
             'assignee_json': assignee_chart.to_json(),
-            'resolution_time': resolution_time_data['average_resolution_time'].days,
-            'min_resolution_time': resolution_time_data['min_resolution_time'].days,
-            'max_resolution_time': resolution_time_data['max_resolution_time'].days,
-            'response_time': response_time_data['average_response_time'].days,
-            'min_response_time': response_time_data['min_response_time'].days,
-            'max_response_time': response_time_data['max_response_time'].days,
+            'resolution_time': self.stringify_timedelta(resolution_time_data['average_resolution_time']),
+            'min_resolution_time': self.stringify_timedelta(resolution_time_data['min_resolution_time']),
+            'max_resolution_time': self.stringify_timedelta(resolution_time_data['max_resolution_time']),
+            'response_time': self.stringify_timedelta(response_time_data['average_response_time']),
+            'min_response_time': self.stringify_timedelta(response_time_data['min_response_time']),
+            'max_response_time': self.stringify_timedelta(response_time_data['max_response_time']),
+            'open_tickets': open_tickets,
+            'pending_tickets': pending_tickets,
             'avg_rating_closed_tickets': avg_rating_closed_tickets['avg_rating'], 
             'resolution_json': resolution_time_chart.to_json(),
-            'avg_rating_per_assignee_json': avg_rating_chart.to_json()
+            'avg_rating_per_assignee_json': avg_rating_chart.to_json(),
+            'tickets_per_category_json': tickets_per_category_chart.to_json(),
+            'resolution_time_per_ticket_json': resolution_time_per_ticket_chart.to_json()
         }
 
         return render(request, self.template_name, context)
@@ -189,7 +214,7 @@ class TicketStatistics(LoginRequiredMixin, View):
             min_response_time=Min('response_time'),
             max_response_time=Max('response_time')
         )
-
+    
     def calculate_resolution_times(self, queryset):
         resolution_times = queryset.annotate(resolution_time=F('time_closed') - F('time_created'))
         return resolution_times.aggregate(
@@ -236,6 +261,27 @@ class TicketStatistics(LoginRequiredMixin, View):
             for entry in avg_rating_per_assignee
         ]
     
+    def calculate_tickets_per_category(self):
+        tickets_per_category = Ticket.objects.values(
+            'category').annotate(total=Count('category'))
+
+        return [
+            {'category': entry['category'], 'total': entry['total']}
+            for entry in tickets_per_category
+        ]
+    
+    
+    def calculate_resolution_time_per_ticket(self):
+        tickets = Ticket.objects.values('assignee__username', 'time_created', 'time_closed')
+
+        data = []
+        for ticket in tickets:
+            if ticket['time_closed'] and ticket['time_created']:
+                resolution_time = ticket['time_closed'] - ticket['time_created']
+                data.append({'assignee_username': ticket['assignee__username'], 'resolution_time': resolution_time.total_seconds() / 86400})
+
+        return data
+
     def generate_rating_bar_chart(self, data, title=''):
         chart = alt.Chart(pd.DataFrame(data)).mark_bar().encode(
             alt.X('avg_rating:Q', axis=alt.Axis(title='Average Rating')),
@@ -248,25 +294,51 @@ class TicketStatistics(LoginRequiredMixin, View):
     def generate_pie_chart(self, data):
         chart = alt.Chart(pd.DataFrame(data)).mark_arc().encode(
             theta='total:Q',
-            color='status:N'
+            color='status:N',
+            tooltip=['total', 'status']
+        ).properties(
+            title='Number of Tickets Per Status'
         )
         return chart
 
     def generate_assignee_bar_chart(self, data):
         chart = alt.Chart(pd.DataFrame(data)).mark_bar().encode(
-            alt.X('total:Q', axis=alt.Axis(title='Total')),
-            alt.Y('assignee__username:N', title='Mpla by category')
+            alt.X('total:Q', axis=alt.Axis(title='Total Number of Tickets')),
+            alt.Y('assignee__username:N', title='Asignee')
+        ).properties(
+            title='Total Number of Tickets per Asingee'
         )
         return chart
 
     def generate_resolution_time_chart(self, data):
         chart = alt.Chart(pd.DataFrame(data)).mark_point().encode(
             x='category:N',
-            y='resolution_time:Q',
+            y=alt.Y('resolution_time:Q', title='Resolution Time (days)'),
             color='category:N',
-            tooltip=['resolution_time:Q']
+            tooltip=[
+                alt.Tooltip('resolution_time:Q', title='Resolution Time', format='.0f'),
+                'category:N'
+            ]
         ).properties(
-            title='Resolution Time per Ticket'
+            title='Resolution Time per Category'
+        )
+        return chart
+    
+    def generate_tickets_per_category_chart(self, data):
+        chart = alt.Chart(pd.DataFrame(data)).mark_bar().encode(
+            alt.X('total:Q', axis=alt.Axis(title='Total Number of Tickets')),
+            alt.Y('category:N', title='Category')
+        ).properties(
+            title='Total Number of Tickets per Category'
+        )
+        return chart
+    
+    def generate_resolution_time_per_ticket_chart(self, data):
+        chart = alt.Chart(pd.DataFrame(data)).mark_point().encode(
+            alt.Y('assignee_username:N', title='Agent Name'),
+            alt.X('resolution_time:Q', axis=alt.Axis(title='Resolution Time (days)'))
+        ).properties(
+            title='Resolution Time per Ticket per Agent'
         )
         return chart
 

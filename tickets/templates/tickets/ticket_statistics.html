@@ -15,44 +15,86 @@
 {% endblock %}
 
 {% block content %}
-    <div class="container pb-1 mt-5">
-        <div class="row">
-            <div class="col">
-                <div class="overflow-hidden mb-3">
-                    <h2 class="font-weight-bold text-8 mb-0 appear-animation" data-appear-animation="textEntrance" data-appear-animation-delay="700">
-                        Ticket stats
-                    </h2>
+<div class="container pb-1 mt-5">
+    <div class="row">
+        <div class="col">
+            <div class="overflow-hidden mb-3">
+                <h2 class="font-weight-bold text-8 mb-0 appear-animation" data-appear-animation="textEntrance" data-appear-animation-delay="700">
+                    Ticket stats
+                </h2>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12 ticket-stat-box mb-5">
+            <div class="row">
+                <div class="col-md-4">
+                    <h4>Response Time</h4>
+                    <p><strong>Avg:</strong> {{ response_time }}</p><br>
+                    <p><strong>Min:</strong> {{ min_response_time }}</p><br>
+                    <p><strong>Max:</strong> {{ max_response_time }}</p><br>
+                </div>
+                <div class="col-md-4">
+                    <h4>Resolution time</h4>
+                    <p><strong>Avg:</strong> {{ resolution_time }}</p><br>
+                    <p><strong>Min:</strong> {{ min_resolution_time }}</p><br>
+                    <p><strong>Max:</strong> {{ max_resolution_time }}</p><br>
+                </div>
+                <div class="col-md-4">
+                    <h4>Other</h4>
+                    <p><strong>Open Tickets:</strong> {{ open_tickets }}</p><br>
+                    <p><strong>Pending Tickets:</strong> {{ pending_tickets }}</p><br>
+                    <p><strong>Avg Rating of Closed Tickets:</strong> {{ avg_rating_closed_tickets }}/5</p><br>
                 </div>
             </div>
         </div>
+    </div>
 
-        <div class="row">
-            <div class="col-md-12 ticket-stat-box mb-5">
-                <p>Average Resolution Time: {{ resolution_time }}</p>
-                <p>Minimun Resolution Time: {{ min_resolution_time }}</p>
-                <p>Maximum Resolution Time: {{ max_resolution_time }}</p>
-                <p>Average Response Time: {{ response_time }}</p>
-                <p>Minimun Response Time: {{ min_response_time }}</p>
-                <p>Maximum Response Time: {{ max_response_time }}</p>
-                <p>Average Rating of Closed Tickets: {{ avg_rating_closed_tickets }}/5</p>
+{% comment %} <div class="container pb-1 mt-5">
+    <div class="row">
+        <div class="col">
+            <div class="overflow-hidden mb-3">
+                <h2 class="font-weight-bold text-8 mb-0 appear-animation" data-appear-animation="textEntrance" data-appear-animation-delay="700">
+                    Ticket stats
+                </h2>
             </div>
         </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12 ticket-stat-box mb-5">
+            <p><strong>Average Resolution Time:</strong> {{ resolution_time }}</p>
+            <p><strong>Minimun Resolution Time:</strong> {{ min_resolution_time }}</p>
+            <p><strong>Maximum Resolution Time:</strong> {{ max_resolution_time }}</p>
+            <p><strong>Average Response Time:</strong> {{ response_time }}</p>
+            <p><strong>Minimun Response Time:</strong> {{ min_response_time }}</p>
+            <p><strong>Maximum Response Time:</strong> {{ max_response_time }}</p>
+            <p><strong>Average Rating of Closed Tickets:</strong> {{ avg_rating_closed_tickets }}/5</p>
+        </div>
+    </div> {% endcomment %}
 
         <div class="row">
-            <div class="col-md-6">
+            <div class="col-md-4">
                 <div id="status-chart" class="chart"></div>
             </div>
-            <div class="col-md-6">
-                <div id="assignee-chart" class="chart"></div>
-            </div>
-        </div>
-
-        <div class="row">
-            <div class="col-md-6">
+            <div class="col-md-4">
                 <div id="resolution-chart" class="chart"></div>
             </div>
-            <div class="col-md-6">
+            <div class="col-md-4">
+                <div id="resolution-time-per-ticket-chart" class="chart"></div>
+            </div>
+        </div>
+    
+        <div class="row">
+            <div class="col-md-4">
+                <div id="assignee-chart" class="chart"></div>
+            </div>
+            <div class="col-md-4">
                 <div id="rating-chart" class="chart"></div>
+            </div>
+            <div class="col-md-4">
+                <div id="tickets-per-category-chart" class="chart"></div>
             </div>
         </div>
     </div>
@@ -65,9 +107,13 @@
         var assigneeSpec = {{ assignee_json | safe }};
         var resolutionSpec = {{ resolution_json | safe }};
         var ratingSpec = {{avg_rating_per_assignee_json | safe}}
-            vegaEmbed('#status-chart', statusSpec);
+        var ticketsPerCategorySpec = {{ tickets_per_category_json | safe }};
+        var resolutionTimePerTicketSpec = {{ resolution_time_per_ticket_json | safe }};
+        vegaEmbed('#status-chart', statusSpec);
         vegaEmbed('#assignee-chart', assigneeSpec);
         vegaEmbed('#resolution-chart', resolutionSpec);
         vegaEmbed('#rating-chart', ratingSpec);
+        vegaEmbed('#tickets-per-category-chart', ticketsPerCategorySpec);
+        vegaEmbed('#resolution-time-per-ticket-chart', resolutionTimePerTicketSpec);
     </script>
 {% endblock %}
