@@ -3,6 +3,7 @@ from django.core.validators import MinValueValidator, MaxValueValidator
 from django.utils import timezone
 from django.contrib.auth.models import User
 from django.core.mail import send_mail
+from django.conf import settings
 
 
 # Create your models here.
@@ -52,16 +53,17 @@ class Ticket(models.Model):
         elif self.status == Status.CLOSED.value and self.time_closed is None:
             self.time_closed = timezone.now()
 
-            self.send_closed_ticket_email()
+            # self.send_closed_ticket_email()
 
         super(Ticket, self).save(*args, **kwargs)
 
-    def send_closed_ticket_email(self):
-        subject = 'Your ticket has been closed'
-        message = f"Your ticket '{self.title}' has been closed. Thank you for using our ticketing system!"
-        to_email = [self.reporter.email]
+    # def send_closed_ticket_email(self):
+    #     subject = 'Your ticket has been closed'
+    #     message = f"Your ticket '{self.title}' has been closed. Thank you for using our ticketing system!"
+    #     from_email = settings.EMAIL_HOST_USER  
+    #     to_email = [self.reporter.email]
 
-        send_mail(subject, message, from_email, to_email)
+    #     send_mail(subject, message, from_email, to_email)
 
     class Meta:
         verbose_name_plural = "Tickets"

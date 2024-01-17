@@ -3,15 +3,18 @@
 
 {% block content %}
 
-<h2>Download Reports</h2>
-<form id="reportForm" method="post" action="{% url 'tickets-report' %}">
-    {% csrf_token %}
-    <label for="timespan">Select Timespan:</label>
-    <select name="timespan" id="timespan">
-        <option value="daily">Daily</option>
-        <option value="weekly">Weekly</option>
-        <option value="monthly">Monthly</option>
-    </select>
-    <button type="submit">Download Report</button>
-</form>
+<div class="content">
+    <h2 class="text-center">Download Reports</h2>
+    <form id="reportForm" method="post" action="{% url 'tickets-report' %}">
+        {% csrf_token %}
+        <label for="timespan">Select Timespan:</label>
+        <select name="timespan" id="timespan">
+            <option value="daily">Daily</option>
+            <option value="weekly">Weekly</option>
+            <option value="monthly">Monthly</option>
+        </select>
+        <button type="submit">Download Report</button>
+    </form>
+</div>  
+
 {% endblock %}
