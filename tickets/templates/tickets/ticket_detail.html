@@ -3,6 +3,15 @@
 {% block title %}Ticket{% endblock %}
 
 {% block content %}
+
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-success">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+
     <div class="container pb-1">
         <div class="row">
             <div class="col">
@@ -36,9 +45,11 @@
         <div class="row">
             <div class="col">
                 <a href="{% url 'ticket-detail-edit' pk=ticket.id %}" class="btn btn-tertiary mb-2">Edit</a>
-                <a href="#" data-id="{{ ticket.pk }}" class="btn btn-secondary mb-2 delete-btn">Delete</a>
+                {% if request.user == ticket.reporter %}
+                     <a href="#" data-id="{{ ticket.pk }}" class="btn btn-secondary mb-2 delete-btn">Delete</a>
+                {% endif %}
 
-                {% if ticket.status == 'closed' %}
+                {% if ticket.status == 'closed' and rating_form %}
                     <form method="post" action="">
                         {% csrf_token %}
                         <div class="form-group">
@@ -47,7 +58,7 @@
                         </div>
                         <button type="submit">Submit Rating</button>
                     </form>
-                {% endif %}
+                {% endif %} 
             </div>
         </div>
     </div>

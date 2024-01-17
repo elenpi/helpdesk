@@ -5,6 +5,7 @@ from django.utils import timezone
 from django.shortcuts import render
 from django.contrib.auth.mixins import LoginRequiredMixin
 from dateutil.relativedelta import relativedelta
+from django.contrib import messages
 
 
 import altair as alt
@@ -102,7 +103,12 @@ class TicketDetail(LoginRequiredMixin, DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['rating_form'] = RatingForm(instance=self.object)
+        
+        if self.request.user == self.object.reporter: # check if current user is the reporter of the ticket
+            context['rating_form'] = RatingForm(instance=self.object)  # show rating form to reporter
+        else:
+            context['rating_form'] = None  # don't show rating form to assignee
+
         return context
 
     def post(self, request, *args, **kwargs):
@@ -114,25 +120,47 @@ class TicketDetail(LoginRequiredMixin, DetailView):
             return HttpResponseRedirect(self.request.path_info)
 
         return self.render_to_response(self.get_context_data(form=form))
-
-
-class TicketUpdate(LoginRequiredMixin, SuccessMessageMixin, UpdateView):
+    
+class TicketUpdate(LoginRequiredMixin, UpdateView):
     model = Ticket
     form_class = TicketForm
     template_name = "tickets/ticket_detail_update_form.html"
-    success_message = "Ticket updated successfully"
 
     def get_success_url(self):
         return reverse("ticket-detail-page", kwargs={"pk": self.object.pk})
 
+    def form_valid(self, form):
+        messages.success(self.request, 'Ticket updated successfully')
+        return super().form_valid(form)
+
     def get_form_kwargs(self):
         kwargs = super(TicketUpdate, self).get_form_kwargs()
         kwargs.update(
-            {
-                'user': self.request.user
-            }
+            {'user': self.request.user}
         )
         return kwargs
+
+
+# class TicketUpdate(LoginRequiredMixin, SuccessMessageMixin, UpdateView):
+#     model = Ticket
+#     form_class = TicketForm
+#     template_name = "tickets/ticket_detail_update_form.html"
+#     success_message = "Ticket updated successfully"
+
+#     def get_success_url(self):
+#         return reverse("ticket-detail-page", kwargs={"pk": self.object.pk})
+
+#     def get_form_kwargs(self):
+#         kwargs = super(TicketUpdate, self).get_form_kwargs()
+#         kwargs.update(
+#             {
+#                 'user': self.request.user
+#             }
+#         )
+#         return kwargs
+    
+#     def get_success_message(self, cleaned_data):
+#         return self.object.get_status_display() + " status has been successfully set for this ticket."
 
 
 class TicketDelete(LoginRequiredMixin, SuccessMessageMixin, View):
@@ -209,13 +237,30 @@ class TicketStatistics(LoginRequiredMixin, View):
 
         return render(request, self.template_name, context)
 
-    def calculate_response_times(self, queryset):
+
+
+    def calculate_response_times(self,queryset):
+        queryset = Ticket.objects.filter(time_in_development__isnull=False)
+
+        # Annotate the queryset with the response time
         response_times = queryset.annotate(response_time=F('time_in_development') - F('time_created'))
-        return response_times.aggregate(
+
+        # Debug: Print or log the annotated queryset to inspect the response times
+        print("Debug info: Annotated response times")
+        for ticket in response_times:
+            print(f"Ticket ID: {ticket.id}, Created: {ticket.time_created}, In Development: {ticket.time_in_development}, Response Time: {ticket.response_time}")
+
+        # Aggregate to find the average, min, and max response times
+        aggregated_data = response_times.aggregate(
             average_response_time=Avg('response_time'),
             min_response_time=Min('response_time'),
             max_response_time=Max('response_time')
         )
+        print("Debug info: Aggregated response times")
+        print(aggregated_data)
+
+        return aggregated_data
+
     
     def calculate_resolution_times(self, queryset):
         resolution_times = queryset.annotate(resolution_time=F('time_closed') - F('time_created'))
@@ -365,7 +410,7 @@ class Reports(LoginRequiredMixin, View):
         response['Content-Disposition'] = f'attachment; filename="{timespan}_report.csv"'
 
         writer = csv.writer(response)
-        writer.writerow(['Timespan (Start Date)', 'Total Tickets', 'Total Tickets In Development', 'Total Tickets Closed',
+        writer.writerow(['Timespan (Start Date)', 'New Tickets', 'Tickets In Development', 'Tickets Closed',
                          'Avg Response Time', 'Avg Resolution Time', 'Avg Rating', 'Most Assigned Agent',
                          'Most Responded Agent'])
 

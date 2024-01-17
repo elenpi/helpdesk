@@ -4,6 +4,7 @@ from django.utils import timezone
 from django.contrib.auth.models import User
 from django.core.mail import send_mail
 from django.conf import settings
+from gmail import GMail, Message
 
 
 # Create your models here.
@@ -28,8 +29,8 @@ class Profile(models.Model):
 
 class Status(models.TextChoices):
     OPEN = 'open'
-    CLOSED = 'closed'
     IN_DEVELOPMENT = 'in development'
+    CLOSED = 'closed'
 
 
 class Ticket(models.Model):
@@ -46,16 +47,24 @@ class Ticket(models.Model):
 
     def __str__(self):
         return f"{self.title}, {self.status}"
-
+    
     def save(self, *args, **kwargs):
         if self.status == Status.IN_DEVELOPMENT.value and self.time_in_development is None:
             self.time_in_development = timezone.now()
         elif self.status == Status.CLOSED.value and self.time_closed is None:
             self.time_closed = timezone.now()
-
-            # self.send_closed_ticket_email()
+            self.send_closed_ticket_email()
 
         super(Ticket, self).save(*args, **kwargs)
+
+    def send_closed_ticket_email(self):
+        gmail = GMail(settings.EMAIL_ADDRESS, settings.EMAIL_PASSWORD)  # Use your actual username and password
+        msg = Message(
+            'Your ticket has been closed',
+            to=self.reporter.email,
+            text=f"Your ticket '{self.title}' has been closed. Thank you for using our ticketing system!"
+        )
+        gmail.send(msg)
 
     # def send_closed_ticket_email(self):
     #     subject = 'Your ticket has been closed'

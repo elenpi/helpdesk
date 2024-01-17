@@ -134,6 +134,8 @@ EMAIL_PORT = 587
 EMAIL_USE_TLS = True 
 EMAIL_HOST_USER = 'ahelpdeskproject@gmail.com' 
 EMAIL_HOST_PASSWORD = 'ksnr vmve xhpl ivyr' 
+EMAIL_ADDRESS = 'ahelpdeskproject@gmail.com'
+EMAIL_PASSWORD = 'ksnr vmve xhpl ivyr'
 
 
 DEFAULT_FROM_EMAIL = 'ahelpdeskproject@gmail.com' 
