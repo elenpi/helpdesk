@@ -13,7 +13,7 @@ class Command(BaseCommand):
         expertise_values = [e.value for e in Expertise]
         status_values = [s.value for s in Status]
 
-        for i in range(20):
+        for i in range(4,14):
             # Creating a reporter user
             username = f'user_{slugify(str(i))}'
             if User.objects.filter(username=username).exists():
@@ -30,7 +30,6 @@ class Command(BaseCommand):
                 Ticket.objects.create(
                     title=f'Ticket {j} of user {username}',
                     description=f'This is ticket {j} of user {username}',
-                    status=random.choice(status_values),
                     category=random.choice(expertise_values),
                     reporter=reporter_user,
                 )
