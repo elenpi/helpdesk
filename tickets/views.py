@@ -32,7 +32,8 @@ class Registration(FormView):
     success_url = "/login"
 
     def form_valid(self, form):
-        form.save()
+        user = form.save()
+        # additional logic...
         return super().form_valid(form)
 
 

@@ -1,5 +1,5 @@
 from django import forms
-from .models import Ticket
+from .models import Ticket, Profile
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 
@@ -8,10 +8,10 @@ class CustomUserCreationForm(UserCreationForm):
     email = forms.EmailField(required=True)
     first_name = forms.CharField(required=True)
     last_name = forms.CharField(required=True)
-
+    expertise = forms.ChoiceField(choices=Profile._meta.get_field('expertise').choices, required=True, help_text="Select your expertise area.")
     class Meta:
         model = User
-        fields = ("username", "first_name", "last_name", "email", "password1", "password2")
+        fields = ("username", "first_name", "last_name", "email", "expertise", "password1", "password2")
         help_texts = {
             'username': "This is the unique identifier for each user",
             'password1': None,
@@ -25,6 +25,7 @@ class CustomUserCreationForm(UserCreationForm):
         user.email = self.cleaned_data['email']
         if commit:
             user.save()
+        Profile.objects.create(user=user, expertise=self.cleaned_data['expertise']) 
         return user
 
 
